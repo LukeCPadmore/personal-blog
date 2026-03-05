@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Evaluating Generative Image Models with the Fréchet Inception Distance | ML Blog</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Evaluating Generative Image Models with the Fréchet Inception Distance" />
+<meta name="author" content="Luke Padmore" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Image Datasets as Samples from a Distribution" />
+<meta property="og:description" content="Image Datasets as Samples from a Distribution" />
+<link rel="canonical" href="http://localhost:4000/2026/03/05/fid-blog.html" />
+<meta property="og:url" content="http://localhost:4000/2026/03/05/fid-blog.html" />
+<meta property="og:site_name" content="ML Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-05T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Evaluating Generative Image Models with the Fréchet Inception Distance" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luke Padmore"},"dateModified":"2026-03-05T00:00:00+00:00","datePublished":"2026-03-05T00:00:00+00:00","description":"Image Datasets as Samples from a Distribution","headline":"Evaluating Generative Image Models with the Fréchet Inception Distance","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2026/03/05/fid-blog.html"},"url":"http://localhost:4000/2026/03/05/fid-blog.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="ML Blog" /><script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">ML Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/">Welcome to my blog</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Evaluating Generative Image Models with the Fréchet Inception Distance</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2026-03-05T00:00:00+00:00" itemprop="datePublished">Mar 5, 2026
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="image-datasets-as-samples-from-a-distribution">Image Datasets as Samples from a Distribution</h2>
+
+<p>In generative modelling we assume that an image dataset consists of samples from an unknown data distribution</p>
+
+\[x \sim p_r(x)\]
+
+<p>where $x$ represents an image. The goal of a generative model is to learn a model distribution</p>
+
+\[x \sim p_g(x)\]
+
+<p>that approximates the real data distribution $p_r(x)$.</p>
+
+<p>However, images are not uniformly distributed in pixel space. Instead they tend to form semantic groupings corresponding to meaningful concepts. Futhermore, even if we could model the true data distribution, we would still need a method of sampling from a highly complex distribution in order to generate images. More on this in a later blog post where we will look at flow-based generative image models!</p>
+
+<hr />
+
+<h2 id="example-mnist-digits">Example: MNIST Digits</h2>
+
+<p>A simple example of this structure is the MNIST handwritten digit dataset, which contains grayscale images of handwritten digits with labels</p>
+
+\[y \in \{0,1,2,3,4,5,6,7,8,9\}.\]
+
+<p>Each image $x$ therefore has an associated semantic label $y$ describing which digit it represents.</p>
+
+<p>We can view the dataset as samples from a joint distribution</p>
+
+\[(x, y) \sim p_r(x, y)\]
+
+<p>where</p>
+
+\[p_r(x, y) = p_r(x \mid y)p(y).\]
+
+<p>Under this view the dataset can be interpreted as a mixture of ten semantic modes, one for each digit:</p>
+
+\[p_r(x)
+=
+\sum_{y=0}^{9} p_r(x \mid y)p(y).\]
+
+<p>For example, \(p_r(x \mid y=0)\) generates images of handwritten zeros.
+Although different people write digits in different ways, images within each class share a common semantic structure.</p>
+
+<hr />
+
+<h3 id="example-mnist-image">Example MNIST Image</h3>
+
+<p><img src="/assets/image_eval/mnist-sample.png" alt="Example MNIST image" /></p>
+
+<p><em>Example MNIST image representing the digit 2.</em></p>
+
+<hr />
+
+<h2 id="generated-images">Generated Images</h2>
+
+<p>A generative model instead produces images from its own distribution</p>
+
+\[x \sim p_g(x).\]
+
+<p>Ideally our generator distribution $p_g$ should match the structure of the data distribution $p_r$. For MNIST this means:</p>
+
+<ul>
+  <li>Generated images should look like digits (high quality)</li>
+  <li>The generator should produce all digits 0–9 (high diversity)</li>
+</ul>
+
+<p>For example, a well-trained generator might produce digits uniformly across classes.
+In contrast, a poorly trained generator might collapse to producing only one digit, such as the digit 3:</p>
+
+\[p_g(x)
+\approx
+p_r(x \mid y=3).\]
+
+<hr />
+
+<h3 id="using-a-classifier-to-measure-semantics">Using a Classifier to Measure Semantics</h3>
+
+<p>To measure whether generated images are recognisable digits we use a classifier</p>
+
+\[p(y \mid x).\]
+
+<p>Given an image $x$, the classifier outputs a probability distribution over digits.
+For example, given an MNIST image, a classifier might output</p>
+
+\[p(y|x)
+=
+[0.01, 0.02, 0.93, 0.02, 0.01, 0.00, 0.00, 0.01, 0.00, 0.00].\]
+
+<p><img src="/assets/image_eval/classifier-output-bars.png" alt="Classifier probability output" /></p>
+
+<p>indicating that the image is very likely to be a 2.</p>
+
+<hr />
+
+<p>This classifier therefore provides a way to measure two desirable properties of a generative model:</p>
+
+<p><strong>Image quality</strong></p>
+
+<p>Our classifier should be confident in its prediction for the class of a generated image, meaning the distribution $c(y \mid x)$ should have low entropy i.e. <strong>$H_c(Y \mid X)$ is small</strong>.</p>
+
+<p><strong>Diversity</strong></p>
+
+<p>The generator should produce many different digits. We can measure this using the marginal class distribution $p(y)$, which is the expected class distribution over all generated images:</p>
+
+\[p(y) = \mathbb{E}_{x \sim p_g}[p(y|x)].\]
+
+<p>If the generator produces all digits, this distribution will have high entropy i.e. <strong>$H(Y)$ is large</strong>.</p>
+
+<p>This idea forms the basis of the Inception Score, which measures how informative generated images are about their semantic class.</p>
+
+<h2 id="a-false-start-the-inception-score-is">A False Start: The Inception Score (IS)</h2>
+
+<p>We can formalise these ideas directly in terms of entropy of the classifier distribution $c(y \mid x)$.</p>
+
+<p>For a single image $x$, define the entropy of the classifier output:</p>
+
+\[H_c(Y \mid x) := -\sum_y c(y \mid x)\,\log c(y \mid x).\]
+
+<p>Over generated samples $x \sim p_g$, define the average conditional entropy:</p>
+
+\[H_c(Y \mid X) := \mathbb{E}_{x \sim p_g}\left[H_c(Y \mid x)\right].\]
+
+<p>To measure diversity, we also need the marginal class distribution induced by generated images. By the total law of probability:</p>
+
+\[c(y) := \mathbb{E}_{x \sim p_g}\left[c(y \mid x)\right].\]
+
+<h3 id="definition">Definition</h3>
+
+\[\text{IS} = \exp\left(\mathbb{E}_{x \sim p_g}\left[\text{KL}\left(c(y\mid x) \;\| c(y)\right)\right]\right)\]
+
+<ul>
+  <li>$c(y\mid x)$ is the conditional class distribution given an image $x$ from a classifier.</li>
+  <li>$c(y)$ is the marginal class distribution over all generated images.</li>
+  <li>
+    <p>$\text{KL}(\cdot | \cdot)$ is the Kullback-Leibler divergence, defined in the discrete case as</p>
+
+\[\text{KL}(P \| Q) = \sum_x P(x) \log\left(\frac{P(x)}{Q(x)}\right).\]
+  </li>
+  <li>
+    <p>The expectation over generated samples is</p>
+
+\[\mathbb{E}_{x \sim p_g}[\cdot],\]
+
+    <p>and in practice this is approximated by averaging over a finite set of generated samples.</p>
+  </li>
+</ul>
+
+<h3 id="intuition">Intuition</h3>
+
+<p>The quantity inside the exponential can be rewritten as an entropy gap:</p>
+
+\[\mathbb{E}_{x \sim p_g}\left[\text{KL}(c(y\mid x) \| c(y))\right]
+= H_c(Y) - H_c(Y \mid X).\]
+
+<p>So IS is large when:</p>
+
+<ul>
+  <li>The classifier is confident on individual samples (low $H_c(Y \mid X)$).</li>
+  <li>The generator is diverse across classes (high $H_c(Y)$).</li>
+</ul>
+
+<h3 id="derivation">Derivation</h3>
+
+<p>Starting from the definition of KL divergence,</p>
+
+\[\text{KL}(c(y\mid x) \| c(y)) = \sum_y c(y\mid x)\,\log\frac{c(y\mid x)}{c(y)}.\]
+
+<p>Taking expectation over $x \sim p_g$ and expanding:</p>
+
+\[\begin{align*}
+\mathbb{E}_{x \sim p_g}\!\left[\text{KL}(c(y\mid x) \| c(y))\right]
+&amp;= \mathbb{E}_{x \sim p_g}\!\left[\sum_y c(y\mid x)\,\log\frac{c(y\mid x)}{c(y)}\right] \\\\
+&amp;= \mathbb{E}_{x \sim p_g}\!\left[\sum_y c(y\mid x)\,\log c(y\mid x)\right]
+   - \mathbb{E}_{x \sim p_g}\!\left[\sum_y c(y\mid x)\,\log c(y)\right] \\\\
+&amp;= -\,\mathbb{E}_{x \sim p_g}\!\left[H_c(Y\mid x)\right]
+   - \sum_y \left(\mathbb{E}_{x \sim p_g}[c(y\mid x)]\right)\log c(y) \\\\
+&amp;= -\,H_c(Y\mid X) - \sum_y c(y)\,\log c(y) \\\\
+&amp;= H_c(Y) - H_c(Y\mid X).
+\end{align*}\]
+
+<h3 id="issues-with-the-inception-score">Issues with the Inception Score</h3>
+
+<h4 id="a-toy-counterexample-equal-weight-gmm--map--maximum-likelihood">A Toy Counterexample (Equal-Weight GMM + MAP = Maximum Likelihood)</h4>
+
+<p>To make the failure mode concrete, consider a toy setting where the <em>data</em> distribution is a Gaussian mixture model (GMM)</p>
+
+\[p_r(x) = \sum_{k=1}^K \pi_k \, \mathcal{N}(x; \mu_k, \Sigma_k)\]
+
+<p>with an associated (latent) semantic label $y \in {1,\dots,K}$ indicating which component generated $x$.</p>
+
+<p>Now suppose we fit a GMM (or equivalently, use a classifier derived from that fit) with estimated component parameters</p>
+
+<p>\(\{\widehat{\mu}_k, \widehat{\Sigma}_k\}_{k=1}^K\).</p>
+
+<p>Suppose the mixture weights are equal, i.e. $\pi_k = 1/K$. The Bayes/MAP classifier for the component label is</p>
+
+\[\hat{y}(x)
+= \arg\max*{k} \; p(y=k \mid x)
+= \arg\max*{k} \; \pi_k \, \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
+
+<p>Since the priors are uniform, the $\pi_k$ term is a constant and the decision rule reduces to <em>maximum likelihood</em>:</p>
+
+\[\hat{y}(x)
+= \arg\max\_{k} \; \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
+
+<p><img src="/assets/image_eval/map-real-regions-contours.png" alt="Real MAP regions and contours" /></p>
+
+<p>So in the equal-weight mixture case, the MAP classifier is simply: pick the component under which $x$ has the highest Gaussian likelihood (using the estimated means and covariances for each component). This is exactly what the MAP decision-region plots are showing: each region corresponds to the component with the largest likelihood under the real mixture.</p>
+
+<h4 id="why-this-gives-a-counterexample-for-the-is">Why this gives a counterexample for the IS</h4>
+
+<p>In this setup, an IS-like score built from the classifier posteriors $c(y\mid x) \approx p(y\mid x)$ is large when:</p>
+
+<ul>
+  <li>The classifier is confident: $c(y\mid x)$ has low entropy.</li>
+  <li>The marginal class distribution is diverse: $c(y)$ is close to uniform.</li>
+</ul>
+
+<p>Now define a <em>bad</em> generator that is class-balanced but off-support, for example:</p>
+
+<ol>
+  <li>Sample</li>
+</ol>
+
+\[y \sim \text{Unif}\{1,\dots,K\}.\]
+
+<ol>
+  <li>Emit</li>
+</ol>
+
+\[x \sim \mathcal{N}(m_y, \varepsilon^2 I),\]
+
+<p>where each $m_y$ is chosen deep inside the MAP region for class $y$, but far from the corresponding estimated mean $\widehat{\mu}_y$ (low likelihood under $p_r$).</p>
+
+<p>Because $m_y$ lies in the MAP region for class $y$, the classifier remains highly confident ($c(y\mid x)\approx \delta_y$), and because $y$ is uniform, the marginal $c(y)$ is uniform as well. The IS-like score can therefore be high even though samples have very low likelihood under the real distribution and look nothing like real data.</p>
+
+<p><img src="/assets/image_eval/map-bad-generator-vs-real-contours.png" alt="Bad generator vs real contours" /></p>
+
+<p>FID avoids this particular failure mode because it compares the <em>generated</em> and <em>real</em> feature distributions rather than only the semantics induced by the classifier.</p>
+
+<h2 id="the-fréchet-inception-distance-fid">The Fréchet Inception Distance (FID)</h2>
+
+<p>FID compares real and generated images by first mapping them into an embedding space using a fixed feature extractor $f(\cdot)$ (most commonly Inception v3 pretrained on ImageNet). The goal is that in this space, images drawn from the real distribution $p_r$ cluster by semantic content and distances become meaningful. We then compare the distributions of embeddings $z_r=f(x_r)$ and $z_g=f(x_g)$ for $x_r \sim p_r$ and $x_g \sim p_g$.</p>
+
+<p>This choice is pragmatic:</p>
+
+<ul>
+  <li>Passing images through a network moves us out of raw pixel space into a representation where distances better reflect semantics (and are less sensitive to small nuisance variations).</li>
+  <li>It is also a form of dimensionality reduction: we replace a very high-dimensional image space with a much smaller feature vector.</li>
+  <li>Modeling the embedded distributions as Gaussians makes the comparison computationally tractable: instead of solving a full optimal transport problem between two empirical distributions, we estimate just $(\mu_r,\Sigma_r)$ and $(\mu_g,\Sigma_g)$ and use the closed-form Gaussian $W_2^2$ formula.</li>
+</ul>
+
+<p>This is an approximation (real feature distributions are not exactly Gaussian), but it is typically stable and cheap to compute, which is why it is used in practice.</p>
+
+<h3 id="fid-calculation-algorithm">FID Calculation (Algorithm)</h3>
+
+<ol>
+  <li>
+    <p>Choose a fixed feature extractor $f(\cdot)$, then compute the features for real and generated images: $z_r = f(x_r)$ for $x_r \sim p_r$ and $z_g = f(x_g)$ for $x_g \sim p_g$.</p>
+  </li>
+  <li>
+    <p>Fit Gaussians to each feature set:</p>
+  </li>
+</ol>
+
+\[z_r \sim \mathcal{N}(\mu_r, \Sigma_r), \qquad z_g \sim \mathcal{N}(\mu_g, \Sigma_g).\]
+
+<ol>
+  <li>Compute the <em>Wasserstein-2</em> between these two Gaussians which has a closed-form solution:</li>
+</ol>
+
+\[\mathrm{FID}
+= \|\mu_r-\mu_g\|^2_2
+
+- \mathrm{Tr}\!\left(\Sigma_r+\Sigma_g-2(\Sigma_r^{1/2}\Sigma_g\Sigma_r^{1/2})^{1/2}\right)\]
+
+<p>where the wasserstein-2 distance between distributions $P$ and $Q$ is defined as:</p>
+
+\[W_2(P, Q) = \left(\inf_{\gamma \in \Gamma(P, Q)} \int \|x - y\|^2\, d\gamma(x, y)\right)^{1/2}\]
+
+<p>The Wasserstein-2 distance can be interpreted as an optimal transport problem: it measures the minimum “work” required to transform one probability distribution into another by transporting probability mass under an optimal coupling (transport plan) $\gamma$. Hence FID can be interpreted as a measure of how much “work” is needed to transform the generated feature distribution into the real feature distribution, and therefore how closely the generator matches the real data distribution in feature space.</p>
+
+<p>To connect FID back to optimal transport, I’ll first derive the closed form in the simplest setting (1D Gaussians). I’ll then sketch how the same idea extends to multivariate Gaussians.</p>
+
+<h3 id="1d-gaussian-derivation">1D Gaussian Derivation</h3>
+
+<p>Suppose we have two 1D Gaussian distributions $P \sim \mathcal{N}(\mu_1, \sigma_1^2)$ and $Q \sim \mathcal{N}(\mu_2, \sigma_2^2)$. The squared Wasserstein-2 distance between these two distributions has a closed-form solution:</p>
+
+\[W_2^2(P,Q) = (\mu_1 - \mu_2)^2 + (\sigma_1 - \sigma_2)^2\]
+
+<p>To derive this, we can use the fact that the optimal transport map $T(x)$ between two 1D distributions is given by quantile matching:</p>
+
+\[T(x) = F_Q^{-1}(F_P(x)).\]
+
+<p>For two Gaussians where $\Phi$ is the CDF of the standard normal distribution, the CDF of $P$ and inverse CDF of $Q$ are given by:</p>
+
+\[F_P(x) = \Phi\left(\frac{x - \mu_1}{\sigma_1}\right) \; , \qquad F_Q^{-1}(u) = \sigma_2 \Phi^{-1}(u) + \mu_2.\]
+
+<p>Composing these gives the optimal transport map:</p>
+
+\[\begin{align*}
+T(x) &amp;= \sigma_2 \Phi^{-1}\left(\Phi\left(\frac{x - \mu_1}{\sigma_1}\right)\right) + \mu_2 \\
+&amp;= \frac{\sigma_2}{\sigma_1} (x-\mu_1)+ \mu_2.
+\end{align*}\]
+
+<p>Let $X \sim P$ and define $Y := T(X)$. By construction $Y \sim Q$. The squared Wasserstein-2 distance can be written as the expected squared transport cost under the optimal map:</p>
+
+\[W_2^2(P,Q) = \mathbb{E}\left[(X - T(X))^2\right] = \mathbb{E}\left[(X-Y)^2\right].\]
+
+<p>Using the identities (1)-(3):</p>
+
+\[\begin{aligned}
+(1)\quad &amp;\mathbb{E}[Z^2] = \operatorname{Var}(Z) + (\mathbb{E}[Z])^2, \\
+(2)\quad &amp;\operatorname{Var}(aX+b) = a^2\,\operatorname{Var}(X), \\
+(3)\quad &amp;\mathbb{E}[aX+b] = a\,\mathbb{E}[X] + b.
+\end{aligned}\]
+
+<p>We can show that the Wasserstein-2 distance between $P$ and $Q$ is given by:</p>
+
+\[\begin{align*}
+W_2^2(P, Q) &amp;= \mathbb{E}\left[(X - T(X))^2\right] \\
+&amp;\overset{(1)}{=} \operatorname{Var}\!\left(X - T(X)\right) + \left(\mathbb{E}[X - T(X)]\right)^2 \\
+&amp;= \operatorname{Var}\!\left(X - \frac{\sigma_2}{\sigma_1} (X-\mu_1) - \mu_2\right) + \left(\mathbb{E}\!\left[X - \frac{\sigma_2}{\sigma_1} (X-\mu_1) - \mu_2\right]\right)^2 \\
+&amp;= \operatorname{Var}\!\left(\left(1-\frac{\sigma_2}{\sigma_1}\right)X + \left(\frac{\sigma_2}{\sigma_1}\mu_1 - \mu_2\right)\right)
+  + \left(\mathbb{E}\!\left[\left(1-\frac{\sigma_2}{\sigma_1}\right)X + \left(\frac{\sigma_2}{\sigma_1}\mu_1 - \mu_2\right)\right]\right)^2 \\
+&amp;\overset{(2)}{=} \left(1-\frac{\sigma_2}{\sigma_1}\right)^2 \operatorname{Var}(X)
+  + \left(\mathbb{E}\!\left[\left(1-\frac{\sigma_2}{\sigma_1}\right)X + \left(\frac{\sigma_2}{\sigma_1}\mu_1 - \mu_2\right)\right]\right)^2 \\
+&amp;\overset{(3)}{=} \left(1-\frac{\sigma_2}{\sigma_1}\right)^2 \operatorname{Var}(X) + \left(\mu_1 - \mu_2\right)^2 \\
+&amp;= (\sigma_1 - \sigma_2)^2 + (\mu_1 - \mu_2)^2.
+\end{align*}\]
+
+<p>Intuitively, the Wasserstein-2 distance between two 1D Gaussians can be decomposed into two components: a mean difference term $(\mu_1 - \mu_2)^2$ that captures the distance between the centers of the distributions, and a variance difference term $(\sigma_1 - \sigma_2)^2$ that captures the distance between the spreads of the distributions. The optimal transport map effectively shifts and scales one distribution to match the other, and the Wasserstein-2 distance quantifies how much “work” is needed to perform this transformation.</p>
+
+<h3 id="multivariate-gaussian-derivation-sketch">Multivariate Gaussian Derivation Sketch</h3>
+
+<p>While we don’t provide a full proof here, similar idea extends to multivariate Gaussians $P \sim \mathcal{N}(\mu_1, \Sigma_1)$ and $Q \sim \mathcal{N}(\mu_2, \Sigma_2)$ where the total “work” needed to transform one distribution into the other is a shifting and scaling. The optimal transport map is given by an affine transformation $T(x) =  \mu_2 + A(x-\mu_1)$ where:</p>
+
+\[A = \Sigma_1^{-1/2}(\Sigma_1^{1/2}\Sigma_2\Sigma_1^{1/2})^{1/2}\Sigma_1^{-1/2}.\]
+
+<p>Using the identities (1)-(3) (where $\operatorname{Tr}(\cdot)$ is the trace operator):</p>
+
+\[\begin{aligned}
+(1)\quad &amp;\mathbb{E}\!\left[\|U\|^2\right] = \|\mathbb{E}[U]\|^2 + \operatorname{Tr}\!\left(\operatorname{Cov}(U)\right), \\
+(2)\quad &amp;\operatorname{Cov}(AU+b) = A\,\operatorname{Cov}(U)\,A^T, \\
+(3)\quad &amp;\operatorname{Tr}(AB) = \operatorname{Tr}(BA).
+\end{aligned}\]
+
+\[\begin{align*}
+W_2^2(P, Q) &amp;= \mathbb{E}\left[\|X - T(X)\|^2\right] \\
+&amp;\overset{(1)}{=} \|\mathbb{E}\left[X - T(X) \right]\|^2 + \operatorname{Tr}\left(\operatorname{Cov}(X-T(X))\right) \\
+&amp;= \|\mathbb{E}\left[X - \mu_2 - A(X -\mu_1) \right]\|^2 + \operatorname{Tr}\left(\operatorname{Cov}((I-A)X - \mu_2 + A\mu_1)\right) \\
+&amp;\overset{(2)}{=} \|\mu_1 - \mu_2 \|^2 + \operatorname{Tr}\left((I-A) \Sigma_1(I-A)^T\right) \\
+&amp;= \|\mu_1 - \mu_2 \|^2 + \operatorname{Tr}\left(\Sigma_1 + \Sigma_2 - 2A\Sigma_1 \right) \\
+&amp;\overset{(3)}{=} \|\mu_1 - \mu_2\|^2 + \operatorname{Tr}\left(\Sigma_1 + \Sigma_2 - 2(\Sigma_1^{1/2}\Sigma_2\Sigma_1^{1/2})^{1/2}\right)
+\end{align*}\]
+
+<h3 id="practical-implementation">Practical Implementation</h3>
+
+<p>This section contains the practical pipeline I used to compute a FID-like score on MNIST, and the toy 2D Gaussian widgets/plots used earlier to build intuition.</p>
+
+<p>In this post I follow the same recipe, but replace Inception v3 with a small MNIST CNN classifier with the final softmax layer removed and treat its final embedding layer as $f(\cdot)$.</p>
+
+<p><strong>Training a CNN on MNIST</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: training code here
+</span></code></pre></div></div>
+
+<p><strong>Extracting Embeddings on Test and Generated Sets</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: compute f(x) embeddings for test set and generated set
+</span></code></pre></div></div>
+
+<p><strong>Computing $W_2^2$ / FID in Embedding Space</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: compute mean/cov and then Gaussian W2^2
+</span></code></pre></div></div>
+
+<p><strong>Projections / Visualisations</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: PCA/UMAP/t-SNE projection plots comparing test vs generated embeddings
+</span></code></pre></div></div>
+
+<h4 id="toy-2d-gaussian-widget">Toy 2D Gaussian Widget</h4>
+
+<p>To build intuition for the metric behaviour, I also use interactive 2D Gaussian examples and MAP-region plots.</p>
+
+<h4 id="interactive-fid-widget">Interactive FID Widget</h4>
+
+<iframe src="/assets/widgets/fid-widget.html" width="100%" height="860" style="border:1px solid #ddd; border-radius:8px;">
+</iframe>
+
+<h4 id="map-regions-and-contour-plots">MAP Regions and Contour Plots</h4>
+
+<p><img src="/assets/image_eval/is-failure-case.png" alt="Toy IS failure case (high IS-like, poor fidelity)" /></p>
+
+  </div><a class="u-url" href="/2026/03/05/fid-blog.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">ML Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Luke Padmore</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A personal blog for my machine learning projects.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
