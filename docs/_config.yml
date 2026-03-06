@@ -1,8 +1,10 @@
 theme: minima
 author: Luke Padmore
-title: ML Blog
+title: Luke Padmore | ML Personal Projects
 description: A personal blog for my machine learning projects.
 markdown: kramdown
 highlighter: rouge
 kramdown:
+  input: GFM
+  math_engine: mathjax
   syntax_highlighter: rouge
