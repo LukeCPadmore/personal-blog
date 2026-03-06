@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Evaluating Generative Image Models with the Fréchet Inception Distance | ML Blog</title>
+<title>Evaluating Generative Image Models with the Fréchet Inception Distance | Luke Padmore ML Personal Projects</title>
 <meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="Evaluating Generative Image Models with the Fréchet Inception Distance" />
 <meta name="author" content="Luke Padmore" />
@@ -12,7 +12,7 @@
 <meta property="og:description" content="Image Datasets as Samples from a Distribution" />
 <link rel="canonical" href="http://localhost:4000/2026/03/05/fid-blog.html" />
 <meta property="og:url" content="http://localhost:4000/2026/03/05/fid-blog.html" />
-<meta property="og:site_name" content="ML Blog" />
+<meta property="og:site_name" content="Luke Padmore ML Personal Projects" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2026-03-05T00:00:00+00:00" />
 <meta name="twitter:card" content="summary" />
@@ -20,7 +20,10 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Luke Padmore"},"dateModified":"2026-03-05T00:00:00+00:00","datePublished":"2026-03-05T00:00:00+00:00","description":"Image Datasets as Samples from a Distribution","headline":"Evaluating Generative Image Models with the Fréchet Inception Distance","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2026/03/05/fid-blog.html"},"url":"http://localhost:4000/2026/03/05/fid-blog.html"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="ML Blog" /><script>
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Luke Padmore | ML Personal Projects" /><link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="shortcut icon" href="/assets/favicon.svg">
+
+<script>
   window.MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
     svg: { fontCache: 'global' }
@@ -30,7 +33,7 @@
 </head>
 <body><header class="site-header" role="banner">
 
-  <div class="wrapper"><a class="site-title" rel="author" href="/">ML Blog</a><nav class="site-nav">
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Luke Padmore | ML Personal Projects</a><nav class="site-nav">
         <input type="checkbox" id="nav-trigger" class="nav-trigger" />
         <label for="nav-trigger">
           <span class="menu-icon">
@@ -40,7 +43,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/">Welcome to my blog</a></div>
+        <div class="trigger"><a class="page-link" href="/">ML Personal Projects</a></div>
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
@@ -57,7 +60,7 @@
   <div class="post-content e-content" itemprop="articleBody">
     <h2 id="image-datasets-as-samples-from-a-distribution">Image Datasets as Samples from a Distribution</h2>
 
-<p>In generative modelling we assume that an image dataset consists of samples from an unknown data distribution</p>
+<p>In generative image modelling we assume that an image dataset consists of samples from an unknown data distribution</p>
 
 \[x \sim p_r(x)\]
 
@@ -98,11 +101,12 @@ Although different people write digits in different ways, images within each cla
 
 <hr />
 
-<h3 id="example-mnist-image">Example MNIST Image</h3>
+<h3 id="example-mnist-grid">Example MNIST Grid</h3>
 
-<p><img src="/assets/image_eval/mnist-sample.png" alt="Example MNIST image" /></p>
-
-<p><em>Example MNIST image representing the digit 2.</em></p>
+<p style="text-align:center;">
+  <img src="/assets/image_eval/mnist_grid.png?v=3" alt="Example MNIST grid" style="display:block; margin:0 auto; width:100%; max-width:720px;" />
+  <em>A sample grid from the MNIST digits dataset.</em>
+</p>
 
 <hr />
 
@@ -130,18 +134,22 @@ p_r(x \mid y=3).\]
 
 <h3 id="using-a-classifier-to-measure-semantics">Using a Classifier to Measure Semantics</h3>
 
-<p>To measure whether generated images are recognisable digits we use a classifier</p>
+<p>To measure whether generated images are recognisable digits we use a classifier $p(y \mid x)$.</p>
 
-\[p(y \mid x).\]
+<p style="text-align:center;">
+  <img src="/assets/image_eval/mnist_digit_2.png?v=3" alt="Example MNIST digit 2" style="display:block; margin:0 auto; width:360px; image-rendering:pixelated;" />
+</p>
 
 <p>Given an image $x$, the classifier outputs a probability distribution over digits.
-For example, given an MNIST image, a classifier might output</p>
+For example, given the MNIST image of a 2 above, a classifier might output</p>
 
 \[p(y|x)
 =
 [0.01, 0.02, 0.93, 0.02, 0.01, 0.00, 0.00, 0.01, 0.00, 0.00].\]
 
-<p><img src="/assets/image_eval/classifier-output-bars.png" alt="Classifier probability output" /></p>
+<p style="text-align:center;">
+  <img src="/assets/image_eval/classifier-output-bars.png?v=3" alt="Classifier probability output" style="display:block; margin:0 auto; width:100%; max-width:760px; border:1px solid #d1d5db; border-radius:8px;" />
+</p>
 
 <p>indicating that the image is very likely to be a 2.</p>
 
@@ -250,13 +258,13 @@ For example, given an MNIST image, a classifier might output</p>
 <p>Suppose the mixture weights are equal, i.e. $\pi_k = 1/K$. The Bayes/MAP classifier for the component label is</p>
 
 \[\hat{y}(x)
-= \arg\max*{k} \; p(y=k \mid x)
-= \arg\max*{k} \; \pi_k \, \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
+= \arg\max_k \; p(y=k \mid x)
+= \arg\max_k \; \pi_k \, \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
 
 <p>Since the priors are uniform, the $\pi_k$ term is a constant and the decision rule reduces to <em>maximum likelihood</em>:</p>
 
 \[\hat{y}(x)
-= \arg\max\_{k} \; \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
+= \arg\max_k \; \mathcal{N}(x; \widehat{\mu}\_k, \widehat{\Sigma}\_k).\]
 
 <p><img src="/assets/image_eval/map-real-regions-contours.png" alt="Real MAP regions and contours" /></p>
 
@@ -358,7 +366,7 @@ T(x) &amp;= \sigma_2 \Phi^{-1}\left(\Phi\left(\frac{x - \mu_1}{\sigma_1}\right)\
 &amp;= \frac{\sigma_2}{\sigma_1} (x-\mu_1)+ \mu_2.
 \end{align*}\]
 
-<p>Let $X \sim P$ and define $Y := T(X)$. By construction $Y \sim Q$. The squared Wasserstein-2 distance can be written as the expected squared transport cost under the optimal map:</p>
+<p>Let $X \sim P$ and define $Y := T(X)$. The squared Wasserstein-2 distance can be written as the expected squared transport cost under the optimal map:</p>
 
 \[W_2^2(P,Q) = \mathbb{E}\left[(X - T(X))^2\right] = \mathbb{E}\left[(X-Y)^2\right].\]
 
@@ -415,38 +423,401 @@ W_2^2(P, Q) &amp;= \mathbb{E}\left[\|X - T(X)\|^2\right] \\
 
 <p>In this post I follow the same recipe, but replace Inception v3 with a small MNIST CNN classifier with the final softmax layer removed and treat its final embedding layer as $f(\cdot)$.</p>
 
+<p>The generated digits used in this section come from a flow-matching model trained on MNIST (which as you can see needs a bit of refinement from the human eye-test perspective!). At a high level, flow matching learns a continuous vector field that transports Gaussian noise toward the data distribution, so sampling means integrating that learned dynamics from noise to an image. For the purposes of this post, I treat that model as a black-box sample generator and focus on how those samples are evaluated with FID.</p>
+
+<figure style="text-align:center; margin: 1rem 0;">
+  <img src="/assets/image_eval/sample_grid_blog.png?v=1" alt="Sample grid of MNIST digits generated by the flow-matching model" style="display:block; margin:0 auto; width:420px; max-width:100%; image-rendering:pixelated;" />
+  <figcaption><em>Generated MNIST digits.</em></figcaption>
+</figure>
+
 <p><strong>Training a CNN on MNIST</strong></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: training code here
-</span></code></pre></div></div>
+<p>The first step is to train a simple classifier whose penultimate activations will serve as the embedding space for FID. The architecture here is intentionally small: two convolutional blocks compress the input image, and a linear layer maps the flattened features into a 128-dimensional embedding before the final classification head.</p>
 
-<p><strong>Extracting Embeddings on Test and Generated Sets</strong></p>
+<div class="code-filename">fid_classifier.py</div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: compute f(x) embeddings for test set and generated set
-</span></code></pre></div></div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
 
-<p><strong>Computing $W_2^2$ / FID in Embedding Space</strong></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: compute mean/cov and then Gaussian W2^2
-</span></code></pre></div></div>
+<span class="c1"># Conv2D -&gt; ReLU -&gt; Conv2D -&gt; ReLU -&gt; MaxPool2D(2) block
+</span><span class="k">class</span> <span class="nc">ConvBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">().</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">out_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="c1"># Simple CNN classifier with final embedding layer and linear output layer
+</span><span class="k">class</span> <span class="nc">FID_classifier</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">conv_block_channels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
+        <span class="n">fid_emb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="n">n_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">image_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">().</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">fid_emb</span> <span class="o">=</span> <span class="n">fid_emb</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">conv_block_channels</span> <span class="o">=</span> <span class="n">conv_block_channels</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">n_classes</span> <span class="o">=</span> <span class="n">n_classes</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">image_size</span> <span class="o">=</span> <span class="n">image_size</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ConvBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">conv_block_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="p">.</span><span class="n">conv_block_channels</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">conv_block_channels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">conv_blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">blocks</span><span class="p">)</span>
+
+        <span class="n">pooled_size</span> <span class="o">=</span> <span class="n">image_size</span> <span class="o">//</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conv_block_channels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">flat_dim</span> <span class="o">=</span> <span class="n">conv_block_channels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">pooled_size</span><span class="o">**</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">out</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Flatten</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">flat_dim</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">fid_emb</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">fid_emb</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">conv_blocks</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">out</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+</code></pre></div></div>
+
+<p><strong>Extracting Embeddings on Test and Generated Sets and computing FID</strong></p>
+
+<p>Once the classifier is trained, I drop the final classification layer and keep only the feature extractor. That gives a backbone which maps each image to an embedding vector. From there the FID pipeline is straightforward: compute the mean and covariance of the real embeddings once, save them, then embed generated samples and compare the two Gaussian summaries.</p>
+
+<div class="code-filename">train_fid_classifier.py</div>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">import</span> <span class="nn">mlflow</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">utils.FID.fid_model</span> <span class="kn">import</span> <span class="n">FID_classifier</span>
+<span class="kn">from</span> <span class="nn">utils.logger_utils</span> <span class="kn">import</span> <span class="n">get_temp_logger</span>
+
+<span class="k">def</span> <span class="nf">compute_fid_stats</span><span class="p">(</span><span class="n">backbone</span><span class="p">:</span> <span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">):</span>
+<span class="n">device</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">backbone</span><span class="p">.</span><span class="n">parameters</span><span class="p">()).</span><span class="n">device</span>
+<span class="n">backbone</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+<span class="n">embs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">backbone</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">embs</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">cpu</span><span class="p">().</span><span class="n">numpy</span><span class="p">())</span>
+
+    <span class="n">embs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">embs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">embs</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cov</span><span class="p">(</span><span class="n">embs</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">embs</span>
+
+<span class="k">def</span> <span class="nf">create_fid_backbone</span><span class="p">(</span><span class="n">fid_classifier</span><span class="p">:</span> <span class="n">FID_classifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">:</span>
+<span class="n">convs</span><span class="p">,</span> <span class="n">clf</span> <span class="o">=</span> <span class="n">fid_classifier</span><span class="p">.</span><span class="n">children</span><span class="p">()</span>
+<span class="n">clf_no_head</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span>\<span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">clf</span><span class="p">.</span><span class="n">children</span><span class="p">())[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="k">return</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">convs</span><span class="p">,</span> <span class="n">clf_no_head</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+<span class="n">model</span><span class="p">:</span> <span class="n">FID_classifier</span><span class="p">,</span>
+<span class="n">trainloader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+<span class="n">valloader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+<span class="n">num_epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="n">lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="n">val_acc_every</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="n">device</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+<span class="n">mlflow</span><span class="p">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="s">"FID Classifier Training"</span><span class="p">)</span>
+<span class="n">optim</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+    <span class="n">run_name</span> <span class="o">=</span> <span class="s">"FID_Classifier_Training_"</span> <span class="o">+</span> <span class="n">datetime</span><span class="p">.</span><span class="n">now</span><span class="p">().</span><span class="n">strftime</span><span class="p">(</span><span class="s">"%Y-%m-%d_%H-%M-%S"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">mlflow</span><span class="p">.</span><span class="n">start_run</span><span class="p">(</span><span class="n">run_name</span><span class="o">=</span><span class="n">run_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">run</span><span class="p">:</span>
+        <span class="n">logger_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"fid_</span><span class="si">{</span><span class="n">run</span><span class="p">.</span><span class="n">info</span><span class="p">.</span><span class="n">run_id</span><span class="si">}</span><span class="s">"</span>
+        <span class="n">logger</span><span class="p">,</span> <span class="n">log_path</span> <span class="o">=</span> <span class="n">get_temp_logger</span><span class="p">(</span><span class="n">logger_name</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">"num_epochs"</span><span class="p">:</span> <span class="n">num_epochs</span><span class="p">,</span>
+            <span class="s">"lr"</span><span class="p">:</span> <span class="n">lr</span><span class="p">,</span>
+            <span class="s">"conv_block_size"</span><span class="p">:</span> <span class="n">model</span><span class="p">.</span><span class="n">conv_block_channels</span><span class="p">,</span>
+            <span class="s">"n_classes"</span><span class="p">:</span> <span class="n">model</span><span class="p">.</span><span class="n">n_classes</span><span class="p">,</span>
+            <span class="s">"fid_embed"</span><span class="p">:</span> <span class="n">model</span><span class="p">.</span><span class="n">fid_emb</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">mlflow</span><span class="p">.</span><span class="n">log_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="s">"Hyperparameters:</span><span class="se">\n</span><span class="s">"</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="p">.</span><span class="n">items</span><span class="p">()))</span>
+
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s">"Training"</span><span class="p">):</span>
+            <span class="n">model</span><span class="p">.</span><span class="n">train</span><span class="p">()</span>
+            <span class="n">running_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">trainloader</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">optim</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+                <span class="n">optim</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+                <span class="n">running_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="n">item</span><span class="p">()</span>
+
+            <span class="n">mlflow</span><span class="p">.</span><span class="n">log_metric</span><span class="p">(</span><span class="s">"cross_entropy_epoch"</span><span class="p">,</span> <span class="n">running_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="p">),</span> <span class="n">step</span><span class="o">=</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Epoch [</span><span class="si">{</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">}</span><span class="s">] | Loss: </span><span class="si">{</span><span class="n">running_loss</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="n">val_acc_every</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+                <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">valloader</span><span class="p">:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">_</span><span class="p">,</span> <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">correct</span> <span class="o">+=</span> <span class="n">torch</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">y</span><span class="p">).</span><span class="n">item</span><span class="p">()</span>
+                        <span class="n">total</span> <span class="o">+=</span> <span class="n">y</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">accuracy</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span>
+                <span class="n">mlflow</span><span class="p">.</span><span class="n">log_metric</span><span class="p">(</span><span class="s">"val_acc"</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">epoch</span><span class="p">)</span>
+                <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Epoch [</span><span class="si">{</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">num_epochs</span><span class="si">}</span><span class="s">] | Val accuracy: </span><span class="si">{</span><span class="n">accuracy</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+        <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">valloader</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nb">max</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">correct</span> <span class="o">+=</span> <span class="n">torch</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">y</span><span class="p">).</span><span class="n">item</span><span class="p">()</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="n">y</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span>
+
+        <span class="n">mlflow</span><span class="p">.</span><span class="n">log_metric</span><span class="p">(</span><span class="s">"val_acc_final"</span><span class="p">,</span> <span class="n">accuracy</span><span class="p">)</span>
+        <span class="n">mlflow</span><span class="p">.</span><span class="n">pytorch</span><span class="p">.</span><span class="n">log_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">"fid_classifier"</span><span class="p">)</span>
+
+        <span class="n">backbone</span> <span class="o">=</span> <span class="n">create_fid_backbone</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">real_embs</span> <span class="o">=</span> <span class="n">compute_fid_stats</span><span class="p">(</span><span class="n">backbone</span><span class="p">,</span> <span class="n">valloader</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">tempfile</span><span class="p">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="n">stats_path</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s">"real_stats.npz"</span><span class="p">)</span>
+            <span class="n">real_embs_path</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s">"real_embeddings.npz"</span><span class="p">)</span>
+            <span class="n">np</span><span class="p">.</span><span class="n">savez</span><span class="p">(</span><span class="n">stats_path</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="n">np</span><span class="p">.</span><span class="n">savez</span><span class="p">(</span><span class="n">real_embs_path</span><span class="p">,</span> <span class="n">embs</span><span class="o">=</span><span class="n">real_embs</span><span class="p">)</span>
+            <span class="n">mlflow</span><span class="p">.</span><span class="n">pytorch</span><span class="p">.</span><span class="n">log_model</span><span class="p">(</span>
+                <span class="n">backbone</span><span class="p">,</span>
+                <span class="n">artifact_path</span><span class="o">=</span><span class="s">"fid_backbone"</span><span class="p">,</span>
+                <span class="n">extra_files</span><span class="o">=</span><span class="p">[</span><span class="n">stats_path</span><span class="p">,</span> <span class="n">real_embs_path</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">mlflow</span><span class="p">.</span><span class="n">log_artifact</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="n">artifact_path</span><span class="o">=</span><span class="s">"logs"</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="p">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">log_path</span><span class="p">),</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<div class="code-filename">fid_evaluation.py</div>
+
+<p>The training script above handles the real side of the comparison: it trains the classifier, strips off the final head, computes embedding statistics on the validation set, and logs those artifacts to MLflow. The evaluation script below then reloads that registered backbone, generates a fresh batch of synthetic samples, embeds them, and applies the standard FID formula to the two Gaussian fits.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">sqrtm</span>
+<span class="kn">import</span> <span class="nn">mlflow</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<span class="k">def</span> <span class="nf">calc_fid</span><span class="p">(</span><span class="n">mu_real</span><span class="p">,</span> <span class="n">sigma_real</span><span class="p">,</span> <span class="n">mu_gen</span><span class="p">,</span> <span class="n">sigma_gen</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">mu_real</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mu_real</span><span class="p">)</span>
+    <span class="n">mu_gen</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mu_gen</span><span class="p">)</span>
+    <span class="n">sigma_real</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma_real</span><span class="p">)</span>
+    <span class="n">sigma_gen</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma_gen</span><span class="p">)</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">mu_real</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="n">sigma_real</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigma_gen</span> <span class="o">+</span> <span class="n">eps</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">eye</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="n">covmean</span> <span class="o">=</span> <span class="n">sqrtm</span><span class="p">(</span><span class="n">sigma1</span> <span class="o">@</span> <span class="n">sigma2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">covmean</span><span class="p">):</span>
+        <span class="n">covmean</span> <span class="o">=</span> <span class="n">covmean</span><span class="p">.</span><span class="n">real</span>
+
+    <span class="n">mean_term</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">((</span><span class="n">mu_real</span> <span class="o">-</span> <span class="n">mu_gen</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">fid</span> <span class="o">=</span> <span class="n">mean_term</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">trace</span><span class="p">(</span><span class="n">sigma1</span> <span class="o">+</span> <span class="n">sigma2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">covmean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">evaluate_fid_with_registered_backbone</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">sample_fn</span><span class="p">,</span>  <span class="c1"># Callable: batch_size -&gt; generated batch tensor
+</span>    <span class="n">device</span><span class="p">,</span>
+    <span class="n">backbone_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"models:/fid_backbone/latest"</span><span class="p">,</span>
+    <span class="n">stats_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"real_stats.npz"</span><span class="p">,</span>
+    <span class="n">real_embeddings_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"real_embeddings.npz"</span><span class="p">,</span>
+    <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5210</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="n">real_loader</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">backbone</span> <span class="o">=</span> <span class="n">mlflow</span><span class="p">.</span><span class="n">pytorch</span><span class="p">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">backbone_uri</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">).</span><span class="nb">eval</span><span class="p">()</span>
+
+    <span class="n">model_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">mlflow</span><span class="p">.</span><span class="n">artifacts</span><span class="p">.</span><span class="n">download_artifacts</span><span class="p">(</span><span class="n">backbone_uri</span><span class="p">))</span>
+    <span class="n">stats_path</span> <span class="o">=</span> <span class="n">model_dir</span> <span class="o">/</span> <span class="s">"extra_files"</span> <span class="o">/</span> <span class="n">stats_filename</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stats_path</span><span class="p">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="nb">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s">"Could not find '</span><span class="si">{</span><span class="n">stats_filename</span><span class="si">}</span><span class="s">' inside model artifacts at </span><span class="si">{</span><span class="n">model_dir</span><span class="si">}</span><span class="s">. "</span>
+            <span class="sa">f</span><span class="s">"Available: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="p">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model_dir</span><span class="p">.</span><span class="n">iterdir</span><span class="p">()]</span><span class="si">}</span><span class="s">"</span>
+        <span class="p">)</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">stats_path</span><span class="p">)</span>
+    <span class="n">mu_real</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="s">"mu"</span><span class="p">]</span>
+    <span class="n">sigma_real</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="s">"sigma"</span><span class="p">]</span>
+    <span class="n">real_embs</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">real_embs_path</span> <span class="o">=</span> <span class="n">model_dir</span> <span class="o">/</span> <span class="s">"extra_files"</span> <span class="o">/</span> <span class="n">real_embeddings_filename</span>
+    <span class="k">if</span> <span class="n">real_embs_path</span><span class="p">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">real_embs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">real_embs_path</span><span class="p">)[</span><span class="s">"embs"</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">real_loader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">real_embs</span> <span class="o">=</span> <span class="n">extract_embeddings_from_loader</span><span class="p">(</span>
+            <span class="n">backbone</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span> <span class="n">dataloader</span><span class="o">=</span><span class="n">real_loader</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+        <span class="p">)</span>
+
+    <span class="n">gen_embs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">remaining</span> <span class="o">=</span> <span class="n">n_samples</span>
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s">"Generating embeddings"</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">sample_fn</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="p">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">imgs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="nb">TypeError</span><span class="p">(</span><span class="s">"sample_fn must return a torch.Tensor"</span><span class="p">)</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">backbone</span><span class="p">(</span><span class="n">imgs</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="p">.</span><span class="n">view</span><span class="p">(</span><span class="n">z</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">gen_embs</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">cpu</span><span class="p">().</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">remaining</span> <span class="o">-=</span> <span class="n">b</span>
+        <span class="n">pbar</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">pbar</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">gen_embs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">gen_embs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">mu_gen</span> <span class="o">=</span> <span class="n">gen_embs</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sigma_gen</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cov</span><span class="p">(</span><span class="n">gen_embs</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">fid</span> <span class="o">=</span> <span class="n">calc_fid</span><span class="p">(</span><span class="n">mu_real</span><span class="p">,</span> <span class="n">sigma_real</span><span class="p">,</span> <span class="n">mu_gen</span><span class="p">,</span> <span class="n">sigma_gen</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">fid</span><span class="p">),</span> <span class="n">gen_embs</span><span class="p">,</span> <span class="n">real_embs</span>
+
+</code></pre></div></div>
 
 <p><strong>Projections / Visualisations</strong></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># TODO: PCA/UMAP/t-SNE projection plots comparing test vs generated embeddings
-</span></code></pre></div></div>
+<p>The FID value is computed in the full embedding space, but it is still useful to inspect a low-dimensional projection for intuition. In the next code block we project both embedding clouds down to 2D with PCA, first plot the raw points, and then fit 2D Gaussians in that PCA space to show how their means and spreads differ visually. These plots should be taken with a grain of salt: they are only rough diagnostics of the full embedding geometry, not the FID computation itself.</p>
 
-<h4 id="toy-2d-gaussian-widget">Toy 2D Gaussian Widget</h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">multivariate_normal</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">sqrtm</span>
+<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
 
-<p>To build intuition for the metric behaviour, I also use interactive 2D Gaussian examples and MAP-region plots.</p>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">'data'</span><span class="p">)</span>
 
-<h4 id="interactive-fid-widget">Interactive FID Widget</h4>
+<span class="n">zr</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s">'real_embeddings.npz'</span><span class="p">)</span>
+<span class="n">zg</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s">'generated_embeddings.npz'</span><span class="p">)</span>
+<span class="n">real_embeddings</span> <span class="o">=</span> <span class="n">zr</span><span class="p">[</span><span class="n">zr</span><span class="p">.</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="n">generated_embeddings</span> <span class="o">=</span> <span class="n">zg</span><span class="p">[</span><span class="n">zg</span><span class="p">.</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
-<iframe src="/assets/widgets/fid-widget.html" width="100%" height="860" style="border:1px solid #ddd; border-radius:8px;">
-</iframe>
+<span class="n">TARGET_N</span> <span class="o">=</span> <span class="mi">3200</span>
+<span class="n">real_sample</span> <span class="o">=</span> <span class="n">real_embeddings</span><span class="p">[</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">real_embeddings</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">TARGET_N</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)]</span>
+<span class="n">gen_sample</span> <span class="o">=</span> <span class="n">generated_embeddings</span><span class="p">[</span><span class="n">rng</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">generated_embeddings</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">TARGET_N</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)]</span>
 
-<h4 id="map-regions-and-contour-plots">MAP Regions and Contour Plots</h4>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">real_sample</span><span class="p">,</span> <span class="n">gen_sample</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="s">'Real'</span><span class="p">]</span> <span class="o">*</span> <span class="n">TARGET_N</span> <span class="o">+</span> <span class="p">[</span><span class="s">'Generated'</span><span class="p">]</span> <span class="o">*</span> <span class="n">TARGET_N</span><span class="p">)</span>
 
-<p><img src="/assets/image_eval/is-failure-case.png" alt="Toy IS failure case (high IS-like, poor fidelity)" /></p>
+<span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">X_pca</span> <span class="o">=</span> <span class="n">pca</span><span class="p">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="s">'Real'</span><span class="p">]</span>
+<span class="n">g2</span> <span class="o">=</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="s">'Generated'</span><span class="p">]</span>
+
+<span class="c1"># Scatter-only plot
+</span><span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">r2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">r2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'Real'</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'#1f77b4'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">g2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">g2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'Generated'</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'#d62728'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">'PCA Scatter: Real vs Generated (n=3200 each)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'PC1'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'PC2'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Fit Gaussians in PCA-2D
+</span><span class="n">mu_r</span><span class="p">,</span> <span class="n">mu_g</span> <span class="o">=</span> <span class="n">r2</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">g2</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cov_r</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cov</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">cov_g</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cov</span><span class="p">(</span><span class="n">g2</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="n">covmean</span> <span class="o">=</span> <span class="n">sqrtm</span><span class="p">(</span><span class="n">cov_r</span> <span class="o">@</span> <span class="n">cov_g</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">covmean</span><span class="p">):</span>
+    <span class="n">covmean</span> <span class="o">=</span> <span class="n">covmean</span><span class="p">.</span><span class="n">real</span>
+<span class="n">fid_2d</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">((</span><span class="n">mu_r</span> <span class="o">-</span> <span class="n">mu_g</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">trace</span><span class="p">(</span><span class="n">cov_r</span> <span class="o">+</span> <span class="n">cov_g</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">covmean</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'FID in PCA-2D (proxy): </span><span class="si">{</span><span class="n">fid_2d</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+
+
+<span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">].</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">].</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1.0</span>
+<span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">].</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">].</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1.0</span>
+<span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span> <span class="n">np</span><span class="p">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="mi">300</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">dstack</span><span class="p">([</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">])</span>
+
+<span class="n">pdf_r</span> <span class="o">=</span> <span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mu_r</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov_r</span><span class="p">).</span><span class="n">pdf</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="n">pdf_g</span> <span class="o">=</span> <span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">mu_g</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">cov_g</span><span class="p">).</span><span class="n">pdf</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">cr</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">contour</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">pdf_r</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s">'#1f77b4'</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">)</span>
+<span class="n">cg</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">contour</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">pdf_g</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s">'#d62728'</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">'PCA-2D Gaussian Contours: Real vs Generated'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'PC1'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'PC2'</span><span class="p">)</span>
+
+<span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s">'#1f77b4'</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'Real'</span><span class="p">),</span>
+    <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s">'#d62728'</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'Generated'</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">legend_handles</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div style="display:flex; gap:16px; align-items:flex-start; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+  <figure style="margin:0; width:360px;">
+    <img src="/assets/image_eval/Real_vs_gen_PCA.png?v=3" alt="Real vs Generated PCA Scatter" style="display:block; width:360px; height:360px; max-width:100%; object-fit:contain; image-rendering:pixelated;" />
+  </figure>
+
+  <figure style="margin:0; width:360px;">
+    <img src="/assets/image_eval/Real_vs_gen_contours.png?v=3" alt="PCA-2D Gaussian Contours: Real vs Generated" style="display:block; width:360px; height:360px; max-width:100%; object-fit:contain; image-rendering:pixelated;" />
+  </figure>
+</div>
+
+<h2 id="interpreting-the-score">Interpreting the Score</h2>
+
+<p>For the generated samples used here, the resulting FID is <code class="language-plaintext highlighter-rouge">548</code> to 3.s.f .</p>
+
+<p>On its own this is a fairly nebulous number. FID is most useful comparatively: lower is better, but the absolute value depends heavily on the feature extractor, the dataset, the preprocessing, and the quality and diversity of the generated samples. In practice, the number matters less in isolation than when it is compared against other models evaluated under the same setup.</p>
+
+<p>The PCA scatter suggests that the two embedding distributions are not completely dissimila, since the real and generated point clouds still occupy overlapping regions. The Gaussian contour plot makes the mismatch clearer: the generated mean is shifted relative to the real one, the principal axes of the two covariances do not line up and the generated distribution appears to have smaller variance along those principal directions.</p>
+
+<p>Later on, I will use this same FID pipeline as a consistent evaluation tool for comparing different flow-matching models on MNIST on a future blog post!</p>
 
   </div><a class="u-url" href="/2026/03/05/fid-blog.html" hidden></a>
 </article>
@@ -457,7 +828,7 @@ W_2^2(P, Q) &amp;= \mathbb{E}\left[\|X - T(X)\|^2\right] \\
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">ML Blog</h2>
+    <h2 class="footer-heading">Luke Padmore | ML Personal Projects</h2>
 
     <div class="footer-col-wrapper">
       <div class="footer-col footer-col-1">

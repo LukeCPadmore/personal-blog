@@ -194,3 +194,13 @@ table td { border: 1px solid #e8e8e8; }
 .highlight .vg { color: #008080; }
 .highlight .vi { color: #008080; }
 .highlight .il { color: #099; }
+
+/* Code blocks: avoid off-screen overflow in posts/pages. */
+.post-content pre, .page-content pre, .post-content .highlighter-rouge .highlight pre, .page-content .highlighter-rouge .highlight pre { overflow-x: auto; /* fallback on wide screens */ white-space: pre-wrap; /* wrap long lines */ word-break: break-word; overflow-wrap: anywhere; }
+
+.post-content pre code, .page-content pre code, .post-content .highlighter-rouge .highlight pre code, .page-content .highlighter-rouge .highlight pre code { white-space: inherit; word-break: inherit; overflow-wrap: inherit; }
+
+/* Optional filename label used above fenced code blocks. */
+.code-filename { display: inline-block; margin: 0.75rem 0 -0.25rem 0; padding: 0.15rem 0.5rem; font: 600 0.85rem/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; border: 1px solid #e5e7eb; border-bottom: none; border-radius: 6px 6px 0 0; background: #f9fafb; color: #111827; }
+
+.code-filename + pre { margin-top: 0; }
